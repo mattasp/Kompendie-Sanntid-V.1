@@ -1,0 +1,39 @@
+\chapter{Threads, SMP and microkernels}
+
+In a multithreaded environment, a process is defined as the unit of resource allocation and a unit of protection. The following are associated with processes:
+* A virtual address space that holds the process image\\
+* Protected access to processors, other processes (for interprocess communication), files and I/O resources (devices and channels)\\
+
+Within a process, there may be one or more threads, each with the following:
+* A thread execution state(Running, ready etc)\\
+* A saved thread context when not running; one way to view a thread is as an independent program counter operating within a process.\\
+* An execution stack.\\
+* Some per-thread static storage for local variables.\\
+* Access to the memory and resources of its process, shared with all other threads in that process.\\
+
+In a multithreaded environment there is a single process control block and user address space associated with the process, and there are separate stacks for each thread, as well as a separate control block for each thread containing register values, priority and other thread-related state information.
+Thus, all of the threads of a process share the state and resources of that process. They reside in the same address space and have access to the same data. When one thread alters an item of data in memory, other threads see the results if and when they access that item. If one thread opens a file with read privileges, other threads in the same process can also read from that file.
+Key benefits of threads:
+1. It takes far less time to create a new thread in an existing process than to create a new process.\\
+2. It takes less time to terminate a thread than a process.\\
+3. It takes less time to swtich between two threads within the same process than to switch between processes.\\
+4. Threads enhance efficiency in communication between different executing programs. In most operating systems, communication between independent processes requires the intervention of the kernel to provide protection and the mechanisms needed for communication. However, because threads within the same process share memory and files, they can communicate with each other without invoking the kernel.\\
+
+
+\subsection{Thread functionality}
+
+Like processes, threads have execution states and may synchronize with one another. 
+
+\subsubsection{Thread states}
+
+As with processes, the key states for a thread are running, ready and blocked. 
+
+There are four basic thread operations associated with a change in thread state:
+* Spawn: Typically, when a new process is spawned, a thread for that process is also spawned. Subsequently, a thread within a process may spawn another thread within the same process, providing an instructino pointer and arguments for the new thread. The new thread is provided with its own register context and stack space and places on the ready queue.\\
+* Block: When a thread needs to wait for an event, it will block (saving its user registers, program counter, and stack pointers). The processor may now turn to the execution of another ready thread in the same or a differnet process.\\
+* Unblock: When the event for which a thread is blocked occurs, the thread is moved to the ready queue.\\
+* Finish: When a thread completes, its register context and stacks are deallocated.\\
+
+\subsubsection{Thread synchronization}
+
+All of the threads of a process share the same address space and other resources, such as open files. Any alteration of a resource by one thread affects the environment of the other threads in the same process. It is therefore necessary to synchronize the activities of the various threads so that they do not interfere with each other or corrupt data structures.

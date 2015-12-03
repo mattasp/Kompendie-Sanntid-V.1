@@ -1,0 +1,45 @@
+\chapter{Operating System Overview 2}
+I dette kapittelet skal du lære:\newline \newline
+$\text{\rlap{$\checkmark$}}\square$
+Summere opp hovedfunksjoner til et operativ system. \newline \newline
+$\text{\rlap{$\checkmark$}}\square$ 
+Diskutere utviklingen til OS fra batch system til nyere komplekse OS. \newline \newline
+$\text{\rlap{$\checkmark$}}\square$ 
+Kort oppsumering av OS forskning. \newline \newline
+$\text{\rlap{$\checkmark$}}\square$ 
+Diskutere hoved-design-områdene i utvikling av OS. \newline \newline
+$\text{\rlap{}}\square$ 
+Definere virituelle maskiner og virituallisering. \newline \newline
+
+\labelOperativsystem}
+Et operativsystem er et program som styrer "execution" av andre applikasjoner. Det er et "interface" mellom hardware og software.
+
+\newline \newline
+For å modelere strukturen mellom hardware og software kan vi si at applikasjonen er øverst, eterfulgt av bibloteker og drivere, så opperativsystemet som har kontakt med execution hardware. Hardware controllerer minne overføring (Memory translation) og system tilkobliner (bus). Som igjen har kontakt med I/O devices og network, sammen med main memory.\newline\newline
+
+Et operativsystem brukes til (services)
+\begin{itemize}
+\item Program development
+\item Program execution
+\item Access I/Odevices
+\item Controlled access to files
+\item System access.
+\item Error detection and response
+\item Accointing
+\end{itemize}
+~\\
+\newline
+Interface til OS skjer gjennom.
+\begin{itemize}
+\item Instruction set architecture (ISA)
+\item Application binary interface (ABI)
+\item Application programming interface (API)
+\end{itemize}
+~\\ \newline
+Der for oss dødelige så er API den mest kjente av disse hovedgruppene. 
+Tenk på API som en programmerers tilgang til all hardware. Si du har lyst å benytte deg av en "feature", feks et biblotek eller operativsystemet så vil du bruke API. Et API består av datatyper/strukturer, constanter, funksjoner, etc som du kan bruke i din kode for å aksessere funksjonaliteter til eksterne komponenter.
+\newline
+Et ABI er veldig likt, tenk på det som den kompilerte versjonen av et API (eller som et API på maskin-språk nivå). Når du skriver kildekode, aksesseres bibloteket gjennom et API. Med en gang koden er kompilert, så aksesseres den binære data i bibloteket gjennom et ABI.
+\newline
+ISA er den delen av prosessoren som er synlig for programmereren eller kompliatoren. ISA fungerer som en grense mellom software og hardware. Du kjenner kanskje til ARM, INTEL, AVR, og lignende. Dette er instruksjonsettene, som gjør ca det samme, men er likevell ganskje forskjellige. Du kan ikke kjøre windows 98 på en ARM prosessor, og du kan ikke kjøre Android på en intel prosessor.
+
