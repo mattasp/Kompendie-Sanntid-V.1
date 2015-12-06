@@ -1,0 +1,83 @@
+\chapter{Linux overview}
+
+\section{Some main features}
+
+\begin{itemize}
+\item Modular Monolithic Kernel
+\item All OS functionality is executed as one large block of code as a single process with a single adress space. 
+\item All functional components have access to internals
+\item The system is divided into Kernel space and User space
+\end{itemize}
+
+\section{Kernel space}
+Where all kernel code is executed. Has unrestricted access to the kernel resources such as drivers, file systems etc.
+
+\subsection{Warning: Root $ \neq $ kernel space}
+Root is the highest level of privilege in user-space, but is not the same as kernel-space code, which run with complete access. Operations related to kernel-space might require root access (installing module).
+
+\section{User space}
+Where all user programs are executed. Code must make system calls to gain access to kernel functionality. Additionally code in the user space can receive signals from the kernel. Code run in user space does not have access to low level hardware or interrupts directly. If functionality of unsupported hardware is needed, code must instead be implemented in the Kernel space, by way of modules.
+
+
+\section {Modules}
+
+\subsection{What?}
+Modules are relatively independent pieces of code that can be linked/unlinked to/from Kernel at runtime. Modules are executed in Kernel (unrestricted) mode.
+
+\subsection{Why? (Pros)}
+Modules are an alternative when you need to use unsupported hardware or cpu functionality. It might also give the opportunity to write code that reduces the number of context switches, thus increasing performance.
+
+\subsection{Why not? (Cons) }
+Depending on preference and skills/experience, development/debugging of modules might be harder to do. Additionally, the modules require usage of other libraries than user-space programs.
+
+
+
+\section{Concurrency in standard Linux}
+There are four basic ways linux uses to implement synchronization:
+\begin{itemize}
+    \item Atomic operations
+        \begin{itemize}
+            \item Executed without interruption 
+        \end{itemize}
+    \item Spin locks
+        \begin{itemize}
+            \item similar to mutexes, but the process will "spin", using CPU time instead of sleeping
+        \end{itemize}
+    \item (Kernel) Semaphores
+        \begin{itemize}
+            \item Semaphore for kernel mode code 
+        \end{itemize}
+    \item semaphores
+        \begin{itemize}
+            \item Used for execution order enforcement
+        \end{itemize}
+\end{itemize}
+
+
+\section{Memory management}
+Linux uses a 3-page level structure. \newline
+Page dir -> page middle dir -> page table -> page frame \\
+
+Memory is eventually used up. To replace memory pages, a "least frequently used" replacement strategy is used. A counter is associated with every frame. This counter is decremented periodically, and incremented upon use. The counter with the lowest value will be the page that has been used the least recently, and is the best candidate for replacement.
+
+\section{Scheduling}
+In linux there are three classes of scheduling:
+\begin{itemize}
+    \item Round Robin real time
+    \item FIFO real time
+    \item other, non-realtime
+\end{itemize}
+
+\subsection{So whats the problem?}
+The scheduling is not intended to be pre-emptive, and generally cant be fully pre-emptive. Additionally, there is often lots of applications and/or services running simoultaneously, which makes it very difficult to predict delays.
+
+
+\section{Processes and threads in Linux}
+In the current version, processes and threads are almost the same. Each is run as separate "kernel threads".
+The main differences are:
+\begin{itemize}
+    \item Threads share the same virtual memory
+    \item context switching is faster between threads than between processes
+\end{itemize}
+
+Each kernel thread is scheduled individually.

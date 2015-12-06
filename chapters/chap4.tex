@@ -20,11 +20,11 @@ Key benefits of threads:
 4. Threads enhance efficiency in communication between different executing programs. In most operating systems, communication between independent processes requires the intervention of the kernel to provide protection and the mechanisms needed for communication. However, because threads within the same process share memory and files, they can communicate with each other without invoking the kernel.\\
 
 
-\subsection{Thread functionality}
+\section{Thread functionality}
 
 Like processes, threads have execution states and may synchronize with one another. 
 
-\subsubsection{Thread states}
+\subsection{Thread states}
 
 As with processes, the key states for a thread are running, ready and blocked. 
 
@@ -34,6 +34,6 @@ There are four basic thread operations associated with a change in thread state:
 * Unblock: When the event for which a thread is blocked occurs, the thread is moved to the ready queue.\\
 * Finish: When a thread completes, its register context and stacks are deallocated.\\
 
-\subsubsection{Thread synchronization}
+\subsection{Thread synchronization}
 
 All of the threads of a process share the same address space and other resources, such as open files. Any alteration of a resource by one thread affects the environment of the other threads in the same process. It is therefore necessary to synchronize the activities of the various threads so that they do not interfere with each other or corrupt data structures.

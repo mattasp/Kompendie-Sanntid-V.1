@@ -1,0 +1,105 @@
+\chapter{QNX overview}
+
+compliance: POSIX 1003.1-2001
+Unix, threads, timers, signals
+
+Arkitektur
+Microkernel
+- OS consist of a small kernel and a set of cooperating processes
+- OS består av en liten kernel og et set cooprative(samarbeidende) prosesser.
+- Prosessene er seperate fra kjernen(kernelen) så hvis noe går galt i en prosess vil dette ikke på virke kjernen.
+
+Fordeler med denne typen arkitektur
+- Stabilitet og rubusthet
+- Enkelt å konfigurere og re-konfigurere
+
+Ulemper:
+- mer overhead
+    - more context switches
+    - more copies of data(data/memory is not shared)
+    
+QNX microkernel
+
+Mikrokernelen i QNX har 6 fundamentale tjenester(services) for operativsystem funksjoner.
+- Synkronisasjon
+- Scheduler
+- Tråder(Threading)
+- Timere(Timers)
+- IPC(Inter-process communication)
+- Interrupt redirectur(Forstyrrelse vidresender)
+
+Microkernel services:
+1.native IPC
+2.thread support
+3.thread scheduling
+4.thread synchronization
+5.timers
+6.interrupt redirection
+
+Mikrokernelen tar imot hardware interrupts og vidresender den til prosesser.
+
+/* redundat information */
+Process:
+- Program loaded into memory
+- identified with a pid(process id)
+- owns spesific resources such as:
+    - Memory, code and data
+    - open files
+    - identity
+    - timers
+    - mutexes
+    - channels
+    - (Could be more such as connection ?)
+
+resources owned by one process are protected from other processes
+some resources can be owned by more than one process.
+
+Thread:
+Single flow of execution/control
+attributes:
+* priority
+* Scheduling alg.
+* register set
+* CPU mask for SMP(Symmetric multprocessing)
+* signal mask
+* others?
+
+All attributes has to do with running code:
+
+Threads in processes, 
+A process must have at least one thread
+threads in a process share all the process resources.
+Threads run code
+Processes owns resources.
+
+IPC (Inter-Process Communication):
+- OS processes and your processes cooperate using IPC. Together the OS and your processes makes up one seamless sysstem.
+- A lot of different types of IPCs
+
+Kernel IPC
+- Messages
+    - Exhcange information between processes
+- Pulses
+    - Delivirng notification to a process
+- Signals
+    - Interrupting a process and making it do something different(Usually used for termination)
+    
+QNX Native IPC API:
+MsgSend()-->MsgReceive()->process msg
+MsgSend()<--MsgReply()
+
+Other IPC methods in IPC includes
+    -built on top of native IPC
+        - pipes
+        - POSIX message queues
+        - TPC/IP Sockets
+        
+
+
+Keywords:
+Process
+Thread
+CPU(Central processing unit)
+MuTex(Mutal Exclusive)
+SMP(Symmetric multiprocessing)
+

@@ -1,0 +1,140 @@
+\chapter{OS comparison}
+
+This topic is exam-relevant, but it is hard to get a good overview due to the fact that it is scattered throughout the book (Stallings). I therefore collected the relevant parts into one OS comparison chapter.
+
+\section{UNIX}
+Traditionally: HW, Kernel, System call interface and UNIX commands and libs and User-written applications. Not a very modular Kernel.
+Modern UNIX was made due to a need to unify, modernize and modularize UNIX. Features such as RT processing support, scheduling classes, dynamically allocated data structures, virtual memory management and preemptive Kernel. E.g. SVR4, BSD, FreeBSD and Solaris 10.
+
+\subsection{Solaris thread and SMP management}
+Process, User-level threads (invisible to the OS), Lightweight processes (a mapping between ULTs and Kernel threads) and Kernel threads. Thread states: RUN (runnable), ONPROC (executing on a processor), SLEEP (blocked), STOP (stopped e.g. for debugging), ZOMBIE (terminated) and FREE (resources freed, waiting for removal). Interrupts are Kernel threads with high priority, to reduce overhead.
+
+\subsection{UNIX concurrency mechanism}
+Mechanisms for interprocessor communication and synchronization:
+\begin{itemize}
+    \item Pipes: FIFO buffer that’s blocks processes if full/ empty. The OS enforces mutex.
+    \item Messages: A block of byte with an accompanying type that can be used to select messages by the receiver. Each process has a message queue (mailbox). Processes block on full/ empty, but not if trying to read a specific message type.
+    \item Shared memory: Fastest form of communication, mutex is not included by the OS.
+    \item Semaphores: With associated queue of blocked processes on each semaphore.
+    \item Signals: SW mechanism that informs a process of asynchronous events. No priorities, handled on process wake-up, in a signal-handler function or ignored.
+\end{itemize}
+
+\subsection{Solaris thread synchronization primitives}
+In addition to the SVR4 mechanisms, Solaris supports mutex locks, semaphores, multiple readers single writer locks and condition variables. These are implemented within the Kernel for kernel-level threads, and also in the thread library for user-level threads. Condition variables are used to wait until a particular condition is true, must be used together with a mutex lock.
+
+\subsection{UNIX, SVR4 and Solaris memory management}
+The UNIX memory management scheme will vary between systems because UNIX is intended to be machine independent. Current implementations of UNIX use paged virtual memory. SVR4 and Solaris use two schemes:
+\begin{itemize}
+    \item The paging system: Provides virtual memory capability to allocate page frames to main memory and to disk block buffers, effective for user processes and disk IO.
+    \item Kernel memory allocator: The kernel requires dynamic memory allocation, but with significantly smaller blocks than the typical page size, so that the paging mechanism would be ineffective. SVR4 uses a version of the buddy system.
+\end{itemize}
+
+\subsection{Traditional UNIX scheduling}
+Used in both SVR3 and 4.3 BSD, this approach is targeted at time-sharing user-interactive environments. The traditional UNIX scheduler employs multilevel feedback using round robin with one-second preemption within each priority queue. Priorities are recomputed (based on a baseexecution history and a user controllable factor called nice), and scheduling decitions are made every second.
+
+\section{Linux}
+Started as a UNIX variant. Linux, its source-code and software packages are now free, and it is developed by a number of people collaborating over the Internet. It is highly modular and easily configurable. Linus is structured as a collection of loadable modules, object files that can be linked/unlinked to from the Kernel at runtime, and executed in Kernel mode by processes.
+
+\subsection{Linux process and thread management}
+A process/ task is a struct with state (execution state: executing, ready, suspended, stopped or zombie) and many other attributes like scheduling info and address space.
+Older Linux kernels, like traditional UNIX supported single threads per process, modern UNIX kernels support multiple Kernel-level threads per process. User-level library functions are used instead, like the pthread (POSIX thread) library.
+Linux does not recognize a distinction between processes and threads; user-level threads are mapped into kernel-level processes. User-level threads within a single user-level process, instead share the same group ID, which enables resource sharing and avoids context switching within a group.
+
+\subsection{Linux concurrency mechanisms}
+Includes all mechanisms from UNIX, and RT signals (Part of the POSIX RT extension). RT signals support priority in delivery, queueing of multiple signals and an integer or a pointer along with the signal.
+Linux also includes a rich set of concurrency mechanisms for kernel-mode threads:
+\begin{itemize}
+    \item Atomic operations: Atomic integer and bitmap operations, must be used on a special data type atomic\_t.
+    \item Spinlocks: Can be acquired by only one thread at a time, all other threads trying will spin until they have acquired the lock. Best in short wait-time situations, because of the busy-waiting of all spinning threads. Reader-writer spinlocks allow multiple readers at a time, as opposed to basic spinlocks.
+    \item Semaphores: User-level semaphores.
+    \item Barriers: To enforce the order in which instructions are executed. Prevents stores and/ or loads to be reordered across the memory barrier.
+\end{itemize}
+
+\subsection{Linux memory management}
+Similar to the schemes of other UNIX implementations, but with its own unique features. The two main aspects of Linux memory management are:
+\begin{itemize}
+    \item Process virtual memory: Linux uses a three-level page table structure with three types of tables: Page directory(one for each active process in main memory, size of one page), page middle directory (may span multiple pages) and page table (may also span multiple pages, each entry refers to one virtual page of the process). At the end of each virtual address is also an offset. To enhance efficiency in reading and writing to main memory, Linux uses the buddy system for a mechanism that deals with blocks of pages mapped into contiguous blocks of page frames.
+    \item Kernel memory allocation: The Linux kernel memory capability managess the physical main memory (allocate and deallocate frames).
+\end{itemize}
+
+\section{QNX}
+UNIX-like OS.
+
+\section{Windows}
+Core-OS software (Executive, Kernel, device drivers and HW abstraction layer) runs in kernel mode, which gives it full access to system data and to the HW, as opposite to the remaining software running in user mode. Windows architecture is highly modular.
+
+\subsection{Process and thread management (Windows 8)}
+\begin{itemize}
+    \item Applications, processes (objects, provide the resources needed), threads (a schedulable entity) and fibers (must be manually scheduled by the app).
+    \item Job object (group of related processes).
+    \item Thread pool (collection of threads to handle asynchronous callbacks).
+    \item User-mode scheduling (apps can switch between UMS threads in user mode).
+\end{itemize}
+Thread states:
+Ready, standby (selected by scheduler, waiting for processor), running, waiting (for an event or because it is suspended), transition (waiting for resource) and terminated.
+
+\subsection{Windows 7 concurrency mechanisms}
+Provided as part of the object architecture:
+\begin{itemize}
+    \item Wait functions: Used to block a threads own execution until a specified criteria have been met, or until a specified timeout. Uses no processor time while waiting. Used by the Dispatcher objects described below.
+    \item Executive dispatcher objects: A thread uses these objects by issuing a wait request to the Windows Executive with a dispatcher object as argument.\newline
+    Objects used to implement synchronization: Notification event (release all waiting threads), synchronization event (releases one waiting thread), mutex, semaphore and waitable timer (releases waiting threads on timeout or at a specified time).\newline
+    Objects used for synchronization and other uses as well: File, process and thread.\newline
+    Each object can be in unsignaled state (can block threads) or signaled state (unblocks blocked threads).
+    \item User-mode critical sections: Within a single process, more effective than mutex objects.
+    \item Slim reader-writer locks: Like critical sections, but slim because it only allocates a pointer-sized piece of memory.
+    \item Condition variables: Used to wait until a particular condition is true. One or all sleeping threads can be waken on signaling this type of lock.
+    \item Lock-free operations: Give programmers the possibility to use interlocked operations, which uses HW facilities to ensure that memory locations can be read, modified and written in a single atomic operation. It is therefore not a SW lock. An advantage is that a thread holding such a lock (the lock-free HW type) cannot be switched away from the processor while holding the lock, and therefore cannot block other threads.
+\end{itemize}
+
+\subsection{Windows memory management}
+Done by the Windows virtual memory manager, which is designed to work over a variety of platforms and to use page sizes from 4 to 64 Kbytes. Some main features are:
+\begin{itemize}
+    \item Windows virtual address map: 32-bit platforms use a four region address space: NULL-pointer assignment region (inaccessible, 64 Kbytes of the user space), user address space (usable, 2 Gbytes), bad-pointer assignment region (inaccessible, 64 Kbytes of the user space) and operating system region (inacessible, 2 Gbytes). Windows 7 64-bit platforms offers 8 Tbytes of user address space.
+    \item Windows paging: The user space region of the address space is divided into fixed-sized pages. The OS manages the addresses in 64 Kbytes contiguous regions that can be either: Available (address not currently used), reserved (cannot be allocated for other use) or committed (initialized for use by the process to access virtual memory pages).
+    \item Windows 8 swapping: swapfile.sys joins pagefile.sys to provide access to temporary storage on the hard drive. Swapping holds items recently taken out of memory, paging holds items that havent been accessed in a long time. Only Windows Store apps (which are small) uses swapping, which swaps the entire process from main memory into the swapfile and immediately frees memory for other apps.
+\end{itemize}
+
+\section{Mac OS X}
+Apples UNIX-based OS for Macintosh computers.
+
+\subsection{Mac OS X Grand Central Dispatch}
+Designers can write blocks (code, portions of applications) that gets assigned to a thread from a thread-pool provided by the GCD on a FIFO basis. Blocks can be associated with an event source e.g. a network socket, to ensure rapid response without the use of polling.
+
+\section{Android}
+Linux-based OS originally designed for touch-screen mobile devices, now becoming the standard OS for the Internet of things due to its open-source nature. It is a complete SW stack, not just an OS; architecture:
+\begin{itemize}
+    \item Apps.
+    \item App framework (high level blocks used to create new apps).
+    \item System libs (system functions written In C/ C++).
+    \item Android runtime (Dalvik virtual machine run by each app, and Core libraries).
+    \item Linux Kernel (smaller than the standard, tailored to a mobile environment).
+\end{itemize}
+
+\subsection{Android process and thread management}
+Each application runs on its own virtual machine and single process, this isolates applications and their resources. An application consists of one or more of four types of components:
+\begin{itemize}
+    \item Activities: A user interface as a single screen.
+    \item Services: Time consuming background operations e.g. play music or fetch data over network. This ensures faster responsiveness for the UI thread.
+    \item Content providers: An interface to private or shared data.
+    \item Broadcast receivers: Responds to system-wide broadcast announcements from apps or system e.g. download complete or low battery.
+\end{itemize}
+The system may kill processes to reclaim memory, a precedence hierarchy is used for determining which process to kill:
+\begin{itemize}
+    \item Foreground process: Required for what the user is currently doing, can be more than one at a time.
+    \item Visible processes: Not foreground, but still visible.
+    \item Service process: None of the above, e.g. playing music.
+    \item Background process: Hosting an activity in the Stopped state.
+    \item Empty process: No active application components, used e.g. to improve next startup time.
+\end{itemize}
+
+\subsection{Android interprocess communication}
+Android does not use the Linux features for interprocess communication (pipes, shared memory, messages, sockets, semaphores and signals), but instead adds to the kernel a new capability known as Binder. Binder provides lightweight remote procedure calls between Androids virtual machines. A client component invokes the RPC, and uses a proxy component to marshal and send the message (now called parcel) to the Binder in the kernel. The Binder sends the parcel to a stub component in the destination process, which performs the unmarshalling and calls the service component with the original request (RPC). The appropriate result is sent the same way back to the client component.
+
+\subsection{Android memory management}
+Android includes many extensions to the normal Linux kernel memory management facility, including:
+\begin{itemize}
+    \item ASHMem: Anonymous shared memory, abstracted as file descriptors that can be passed to other processes for memory sharing.
+    \item Pmem: Allocates virtual memory physically contiguously, useful for HW that does not support virtual memory.
+    \item Low Memory Killer: Most mobile devices does not have swap capability because of flash lifetime considerations. This feature notifies apps that they must free memory. Noncooperating apps get terminated.
+\end{itemize}
