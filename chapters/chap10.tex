@@ -20,23 +20,23 @@ Scheduling}
     \begin{tabular}{ | l | p{7cm} | p{3cm} |}
     \hline
     Grain Size & Description & Synchronization interval (instructions) \\ \hline
-    Fine & Parallelism inherent in a single
-instruction stream. & <20  \\ \hline
-    Medium & Parallel processing or multitasking
-within a 
-
-single application & 20-200 \\ \hline
-    Coarse & 
-    Multiprocessing of concurrent processes
-in a multiprogramming environment & 200-2000 \\ \hline
-Very Coarse & 
-    Distributed processing across network
-nodes to form a single computing
-environment & 2000-1M \\ \hline
-Independent & 
-    Multiple unrelated processes & not applicable \\ \hline
+    Fine & Parallelism inherent in a single instruction stream. & <20  \\ \hline
+    Medium & Parallel processing or multitasking within a single application & 20-200 \\ \hline
+    Coarse & Multiprocessing of concurrent processes in a multiprogramming environment & 200-2000 \\ \hline
+	Very Coarse & Distributed processing across network nodes to form a single computingenvironment & 2000-1M \\ \hline
+	Independent &  Multiple unrelated processes & not applicable \\ \hline
     \end{tabular}
 \end{center}
+
+\subsection{Coarse and Very Coarse Grained Parallelism}
+Synchronization among processes, but at a very gross level. Good for concurrent processes running on a multiprogrammed uniprocessor. This can also be supported on a multiprocessor with little or no change to user software
+\subsection{Medium Grained Parallelism}
+Single application can be effectively implemented as a collection of
+threads within a single process where the programmer must explicitly specify the potential parallelism of an application. It also requires there to be a high degree of coordination and interaction among the threads of an application, leading to a medium-grain level of synchronization. Because of the various threads of an application interact so frequently, scheduling decisions concerning one thread may affect theperformance of the entire application
+
+\subsection{Fine Grained Parallelism}
+Represents a much more complex use of parallelism than is found in
+the use of threads it is a specialized and fragmented area with many different approaches.
 
 
 \section{Design issues}
@@ -48,13 +48,33 @@ Actual dispatching of a process
 Use of multiprogramming on individual processors
 \item 
 Assignment of processes to processors
-
 \end{itemize}
 
+\subsection{Assignment of processes to processor}
+Both dynamic and static methods require someway of assigning a process to a processor.
+There is two approches:
+
+\begin{itemize}
+\item 
+Master/Slave
+\item 
+Peer
+\end{itemize}
 \section{Multicore thread scheduling}
 
+\subsubsection{Master/Slave}
+Key kernel functions always run on a particular processor and Master is responsible for scheduling.  Slave sends service request to the master. Slaves are simple and requires little enhancement to a uniprocessor multiprogramming operating system. Conflict resolution is simplified because one processor has control of all memory and I/O resources. Dissadvantages with this setup is that if failure occurs in master. It brings the down whole system. Also master can become a performance bottleneck.
 
-\section{Process scheduling}
+
+\subsubsection{Peer}
+Kernel can execute on any processor. Each processor does self-scheduling from the pool of available processes. This however complicates the operating system. The operating system must ensure that two processors do not choose the same process and that the processes are not somehow lost from the queue.
+
+\subsection{Process scheduling}
+Usually processes are not dedicated to processors, a single queue is used for all processors. If some sort of priority scheme is used, there are multiple queues based
+on priority. System is viewed as being a multi-server queuing architecture.
+
+\subsection{Thread scheduling}
+
 \begin{itemize}
 \item 
 \emph{Load Sharing} - Prosesser er ikke gitt til en spesefikk prosessor.
@@ -83,32 +103,28 @@ execution
 \emph{Round-robin scheduling } - Bytter 
 \end{itemize}
 
+\subsection{EDF - Earliset deadline first shceduling}
 
-Not exact but attractive due to it's simplicity
+Always run task with earliest absolute deadline
 
-Utilization test for FPS
+\subsubsection{Utilization-based Test for EDF}
+$$ U = \sum\limits_{i=1}^n \frac{C_i}{T_i} \leq 1 $$
+Superior to FPS (0.69 bound in worst-case); it can
+support high utilizations. However bound only applicable to simple task model. So although EDF is always as good as FPS, and usually better.
 
-$ Sum(C_i/T_i) <= N(2^(1/N) - 1) $
-
-Where T is period
-C is computation time
-N is number of tasks
-
-This test is sufficient but not necessary. This means that if the test fails the tasks may or may not fail at run-time.
-
-Improved utilization test
-
-$ N II i=1 (C_i/T_i + 1) =< 2$ 
-
-RTA for FPS
-
-$R_i = C_i + I_i $
-
-I is the maximum interference
-
-Ceiling function $(^[]^)$
-
-Number of release $Ceil(R_i/T_j)$
-
-
-$ w_i = C_i + sum(ceil(w_i^n/T_j)*C_j)$ 
+\subsection{FPS vs EDF}
+\begin{itemize}
+\item + FPS is easier to implement as priorities are static
+\item + EDF is dynamic and requires a more complex runtime
+system which will have higher overhead
+\item + It is easier to incorporate tasks without deadlines
+into FPS; giving a task an arbitrary deadline is more
+artificial
+\item + It is easier to incorporate other factors into the
+notion of priority than it is into the notion of deadline
+\item + FPS is more predictable; Low priority process miss
+their deadlines first
+\item + During overload EDF is unpredictable; a domino effect can occur in
+which a large number of processes miss deadlines
+\item - EDF gets more out of the processor.
+\end{itemize}

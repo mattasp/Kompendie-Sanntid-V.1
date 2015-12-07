@@ -3,8 +3,13 @@
 This topic is exam-relevant, but it is hard to get a good overview due to the fact that it is scattered throughout the book (Stallings). I therefore collected the relevant parts into one OS comparison chapter.
 
 \section{UNIX}
-Traditionally: HW, Kernel, System call interface and UNIX commands and libs and User-written applications. Not a very modular Kernel.
-Modern UNIX was made due to a need to unify, modernize and modularize UNIX. Features such as RT processing support, scheduling classes, dynamically allocated data structures, virtual memory management and preemptive Kernel. E.g. SVR4, BSD, FreeBSD and Solaris 10.
+Traditionally, the architecture of UNIX is structured in the following layers (starting from the underlying HW): \begin{itemize}
+    \item Kernel.
+    \item System call interface.
+    \item UNIX commands and libraries.
+    \item User-written applications.
+\end{itemize}
+The two last modules both have access to the system call interface (they are on the same layer). This was not a very modular Kernel. Modern UNIX was therefore made due to a need to unify, modernize and modularize UNIX. Features such as RT processing support, scheduling classes, dynamically allocated data structures, virtual memory management and preemptive Kernel was added. Some modern UNIX systems are SVR4, BSD, FreeBSD and Solaris 10.
 
 \subsection{Solaris thread and SMP management}
 Process, User-level threads (invisible to the OS), Lightweight processes (a mapping between ULTs and Kernel threads) and Kernel threads. Thread states: RUN (runnable), ONPROC (executing on a processor), SLEEP (blocked), STOP (stopped e.g. for debugging), ZOMBIE (terminated) and FREE (resources freed, waiting for removal). Interrupts are Kernel threads with high priority, to reduce overhead.
@@ -12,7 +17,7 @@ Process, User-level threads (invisible to the OS), Lightweight processes (a mapp
 \subsection{UNIX concurrency mechanism}
 Mechanisms for interprocessor communication and synchronization:
 \begin{itemize}
-    \item Pipes: FIFO buffer that’s blocks processes if full/ empty. The OS enforces mutex.
+    \item Pipes: FIFO buffer that blocks the processes if full/ empty. The OS enforces mutex.
     \item Messages: A block of byte with an accompanying type that can be used to select messages by the receiver. Each process has a message queue (mailbox). Processes block on full/ empty, but not if trying to read a specific message type.
     \item Shared memory: Fastest form of communication, mutex is not included by the OS.
     \item Semaphores: With associated queue of blocked processes on each semaphore.
@@ -20,7 +25,7 @@ Mechanisms for interprocessor communication and synchronization:
 \end{itemize}
 
 \subsection{Solaris thread synchronization primitives}
-In addition to the SVR4 mechanisms, Solaris supports mutex locks, semaphores, multiple readers single writer locks and condition variables. These are implemented within the Kernel for kernel-level threads, and also in the thread library for user-level threads. Condition variables are used to wait until a particular condition is true, must be used together with a mutex lock.
+In addition to the SVR4 mechanisms, Solaris supports mutex locks, semaphores, multiple readers single writer locks and condition variables. These are implemented within the Kernel for kernel-level threads, and also in the thread library for user-level threads. Condition variables are used to wait until a particular condition is true, and must be used together with a mutex lock.
 
 \subsection{UNIX, SVR4 and Solaris memory management}
 The UNIX memory management scheme will vary between systems because UNIX is intended to be machine independent. Current implementations of UNIX use paged virtual memory. SVR4 and Solaris use two schemes:

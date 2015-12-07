@@ -1,0 +1,206 @@
+\chapter{Response time analysis}
+\section{Response time analysis}
+Rate monotonic priority ordering is optimal for the simple task model. Hence using these equations to model a Real-time systems respons require a rate monotonic priority ordering.
+\subsection{Utilization test}
+Simple utilization-based schedulability tests are not exact
+for FPS, but attractive due to it's simplicity.
+
+$$ U = \sum\limits_{i=1}^n \frac{C_i}{T_i} \leq N(2^{\frac{1}{N}} - 1) $$
+$$ U \leq 0.69 \text{ as } N \to \infty $$ %and beyond :D
+\newline
+T is period\\
+C is computation time(execution time)\\
+N is number of tasks\\
+\newline This test is sufficient but not necessary. This means that if the test fails the tasks may or may not fail at run-time.\\
+\newline Improved utilization test:
+
+$$ N  \prod\limits_{i=1}^n (\frac{C_i}{T_i} + 1) =< 2 $$
+
+\subsection{Response time analysis tests}
+Response time analysis is flexible and caters for:
+\begin{itemize}
+\item 
+Any priority ordering
+\item 
+Periodic and sporadic processes
+\item 
+Is necessary and sufficient for many situations
+\end{itemize}
+
+
+$R_i = C_i + I_i $
+
+I is the maximum interference
+
+Ceiling function $\lceil\rceil$
+
+Number of release $\lceil R_i/T_j \rceil$ \\
+Response time equation:
+$$ R_i = C_i + \sum\limits_{j \in hp(i)} \lceil \frac{R_i}{T_j} \rceil * C_j $$
+Where hp means the set of tasks with priority higher than task $i$.\\
+Solve then by forming a recurrence relation ship:
+$$ w_i^{n+1} = C_i + \sum\limits_{j \in hp(i)}\lceil \frac{w_i^n}{T_j}\rceil *C_j$$ \\
+
+\subsection{Examples}
+Example of failing utilization test and failing ceiling protocol check
+
+\begin{center}
+    \begin{tabular}{ | l | l | l |}
+    \hline
+    Task & Period & Execution time \\ \hline
+    A & 3  & 1 \\ \hline
+    B & 8 & 2 \\ \hline
+    C & 11 & 4 \\ \hline
+    \end{tabular}
+\end{center}
+
+Utilization test:
+
+$ U = \sum\limits_{i=1}^n \frac{C_i}{T_i} \leq N(2^{\frac{1}{N}} - 1) $
+$$ U_a =  \frac{1}{3} = 0.33... $$
+$$ U_b =  \frac{2}{8} = 0.25 $$
+$$ U_c =  \frac{4}{11} = 0.36... $$
+$$ U = 0.33.. + 0.25 + 0.36... 	\approx 0.94 $$
+$$ \text{Number of tasks } N = 3 $$
+$$ \text{Max utilization is then } 3*(2^{\frac{1}{3}} - 1) \approx 0.78 $$
+$$ \text{Test: } 0.94 \nleq 0.78 \text{ hence the test fails} $$\\
+
+Since the utilization test fails scheduability is uncertain.\newline
+
+We can then use ceiling protocol to do a response-time analysis to check if the tasks are not missing deadlines.
+
+$$ R_a = 1 $$
+$$ R_a \leq T_a $$
+$$1 \leq 3 \text { this is True} $$
+Since $R_a \leq Period A $ we know that no deadlines of A is missed
+$$ w_b^0 = 2  $$
+$$ w_b^1 = 2 +  1 * \lceil \frac{2}{3} \rceil = 2 + 1*1 = 3 $$
+$$ w_b^2 = 2 +  1 * \lceil \frac{2}{3} \rceil = 2 + 1*1 = 3 $$
+$$ R_b = 3 $$
+$$ R_b \leq T_b $$ 
+$$ 3 \leq 8 \text { this is True} $$
+Since $R_b \leq Period B $ we know that no deadlines of B is missed
+$$ w_c^0 = 4  $$
+$$ w_c^1 = 4 + 2 * \lceil \frac{4}{8} \rceil + 1 * \lceil \frac{4}{3} \rceil = 8 $$
+$$ w_c^2 = 4 + 2 * \lceil \frac{8}{8} \rceil + 1 * \lceil \frac{8}{3} \rceil = 9 $$
+$$ w_c^3 = 4 + 2 * \lceil \frac{9}{8} \rceil + 1 * \lceil \frac{9}{3} \rceil  = 11 $$
+$$ w_c^4 = 4 + 2 * \lceil \frac{11}{8} \rceil + 1 * \lceil \frac{11}{3} \rceil = 12 $$
+$$ w_c^5 = 4 + 2 * \lceil \frac{12}{8} \rceil + 1 * \lceil \frac{12}{3} \rceil  = 12 $$
+$$ R_c = 12 $$
+$$\text{Test: } R_c \leq T_c $$
+$$ 12 \nleq 11 \text{ Test fails}$$
+Since $R_b \nleq Period  C $ we know that deadlines of C is missed hence the tasks are not guaranteeded to not miss deadlines. So we can say they are not scheduable. 
+\newline
+\newline
+Example of failing utilization test and passing RTA check:
+\newline
+If the utilization test passes there is actually no need to do a respones time analysis(RTA).
+
+\begin{center}
+    \begin{tabular}{ | l | l | l |}
+    \hline
+    Task N=4 & Period T & Execution time C \\ \hline
+    A & 20  & 2 \\ \hline
+    B & 33 & 5 \\ \hline
+    C & 8 & 2 \\ \hline
+    D & 11 & 3 \\ \hline
+    \end{tabular}
+\end{center}
+
+One important thing to remember is that these tests are for rate-monotonic priorities. This means the task with the lowest period is the first task to check then the 2nd lowest etc.
+
+$$ U = 0.1 + 0.15...+ 0.25 + 0.27...\approx 0.77 $$
+$$ U_{max} = 4*(2^{\frac{1}{4}} - 1) \approx 0.757 $$
+$$ \text{Test: } U \nleq U_max \text{ hence the test fails} $$\newline
+
+So the scheduability of this task set is uncertain. Hence we need to do a RTA. Starting with the task with the lowest period/earlies deadline(EDF)
+
+$$ R_c = 2 $$
+$$ 2 \leq 8 $$
+\newline Task C does not miss a deadline. Then moving on to the 2nd lowest period which is D.
+$$ w_d^0 = 3  $$
+$$ w_d^1 = 3 +  2 * \lceil \frac{3}{8} \rceil = 3+2 = 5 $$
+$$ w_d^2 = 3 +  2 * \lceil \frac{5}{8} \rceil = 3 + 2 = 5 $$
+$$ R_d = 5 $$
+$$ 5 \leq 11 $$
+\newline Task D does not miss a deadline. Then moving on to the 3rd lowest period which is A.
+$$ w_a^0 = 2  $$
+$$ w_a^1 = 2 + 3 * \lceil \frac{2}{11} \rceil + 2 * \lceil \frac{2}{8} \rceil = 7 $$
+$$ w_a^2 = 2 + 3 * \lceil \frac{7}{11} \rceil + 2 * \lceil \frac{7}{8} \rceil   = 7 $$
+$$ R_a = 7 $$
+$$ 7 \leq 20 $$
+\newline Task A does not miss a deadline. Then moving on to the highest period which is B.
+$$ w_b^0 = 5  $$
+$$ w_b^1 = 5 + 3 * \lceil \frac{5}{20} \rceil + 3 * \lceil \frac{5}{11} \rceil 2 * \lceil \frac{5}{8} \rceil = 12 $$
+$$ w_b^2 = 5 + 3 * \lceil \frac{12}{20} \rceil + 3 * \lceil \frac{12}{11} \rceil 2 * \lceil \frac{12}{8} \rceil = 17 $$
+$$ w_b^3 =5 + 3 * \lceil \frac{17}{20} \rceil + 3 * \lceil \frac{17}{11} \rceil 2 * \lceil \frac{17}{8} \rceil  = 19 $$
+$$ w_b^4 = 5 + 3 * \lceil \frac{19}{20} \rceil + 3 * \lceil \frac{19}{11} \rceil 2 * \lceil \frac{19}{8} \rceil = 19 $$
+$$ R_b = 7 $$
+$$ 19 \leq 33 $$
+\newline Even tho the utilization test does not pass. The task set is scheduable. We found this from checking with the RTA analysis that non of the tasks will miss any deadlines. It's also important to remember if you can't get any reoccuring values using RTA before the value of $w_i$ is greater than the deadline/period that means $w_i \nleq T_i $ so if $ w_b$ got a value like $w_b = 34$ before any reoccuring values this means that task B has missed a deadlines.
+
+\section{Priority Ceiling Protocols}
+Two froms
+
+\begin{itemize}
+\item Original ceiling priority protocol(OCPP)
+\item Immediate ceiling priority protocol(ICPP)
+\end{itemize}
+
+On a Single Processor a high-priority task can be blocked at most once
+during its execution by lower-priority tasks. Using a CPP prevents deadlocks and Transitive blocking. Mutual exclusive access to resources is ensured (by
+the protocol itself)
+
+\subsection{Original ceiling priority protocol}
+\begin{itemize}
+\item Each task has a static default priority assigned (perhaps by
+the deadline monotonic scheme)
+\item Each resource has a static ceiling value defined, this is the
+maximum priority of the tasks that use it
+\item A task has a dynamic priority that is the maximum of its
+own static priority and any it inherits due to it blocking
+higher-priority tasks
+\item A task can only lock a resource if its dynamic priority is
+higher than the ceiling of any currently locked resource
+(excluding any that it has already locked itself)
+\item $B_i = \max_{k=1}^k usage(k,i)*C(k)$
+\item Even though blocking has a ‘single term’ impact,
+good design practice is to keen all critical sections
+small
+\end{itemize}
+\subsection{Immediate ceiling priority protocol}
+\begin{itemize}
+\item Each task has a static default priority assigned
+(perhaps by the deadline monotonic scheme)
+\item Each resource has a static ceiling value defined,
+this is the maximum priority of the tasks that use it
+\item A task has a dynamic priority that is the maximum
+of its own static priority and the ceiling values of
+any resources it has locked
+\item As a consequence of ICPP, a task will only suffer a
+block at the very beginning of its execution
+\item Once the task starts actually executing, all the
+resources it needs must be free; if they were not,
+then some task would have an equal or higher
+priority and the task's execution would be
+postponed
+\end{itemize}
+
+\subsection{OCPP vs ICPP}
+Although the worst-case behaviour of the two ceiling
+schemes is identical (from a scheduling view point), there
+are some points of difference:
+\begin{itemize}
+\item ICCP is easier to implement than the original (OCPP) as
+blocking relationships need not be monitored
+\item ICPP leads to less context switches as blocking is prior to
+first execution
+\item ICPP requires more priority movements as this happens
+with all resource usage
+\item OCPP changes priority only if an actual block has
+occurred
+\end{itemize}
+
+Note that ICPP is called Priority Protect Protocol in
+POSIX and Priority Ceiling Emulation in Real-Time
+Java
