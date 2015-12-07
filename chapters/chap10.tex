@@ -1,0 +1,114 @@
+\chapter{Multiprocessor,
+Multicore
+and Real
+-Time
+Scheduling}
+
+\section{Classification of multiprocessor Systems}
+\begin{itemize}
+\item 
+\emph{Loosly coupled or distributed multiprocessors, or clustors} - Består av en sammling realtivt autonome systemer. Der hver provessosr har sitt eget hoved minne og I/O channels.
+\item 
+\emph{Functionally specialized processors} - Det er en master general-purpose processors. Spesialliserte prosessorer som er kontrollert av masteren og har forskjellige services(tjenester) til/av hovedprosessoren.
+\item 
+\emph{Tightly coupled multiprocessor}- Består av et sett prosessorer som deler et hoved minne og er integrert og kontrollert av et operative system. Se ARM big little architecture f.eks for mer info.
+\end{itemize}
+
+\section{Granuality}
+
+\begin{center}
+    \begin{tabular}{ | l | p{7cm} | p{3cm} |}
+    \hline
+    Grain Size & Description & Synchronization interval (instructions) \\ \hline
+    Fine & Parallelism inherent in a single
+instruction stream. & <20  \\ \hline
+    Medium & Parallel processing or multitasking
+within a 
+
+single application & 20-200 \\ \hline
+    Coarse & 
+    Multiprocessing of concurrent processes
+in a multiprogramming environment & 200-2000 \\ \hline
+Very Coarse & 
+    Distributed processing across network
+nodes to form a single computing
+environment & 2000-1M \\ \hline
+Independent & 
+    Multiple unrelated processes & not applicable \\ \hline
+    \end{tabular}
+\end{center}
+
+
+\section{Design issues}
+Scheduling on a multiprocessor involves three interrelated issues:
+\begin{itemize}
+\item 
+Actual dispatching of a process
+\item 
+Use of multiprogramming on individual processors
+\item 
+Assignment of processes to processors
+
+\end{itemize}
+
+\section{Multicore thread scheduling}
+
+
+\section{Process scheduling}
+\begin{itemize}
+\item 
+\emph{Load Sharing} - Prosesser er ikke gitt til en spesefikk prosessor.
+\item 
+\emph{Gang Scheduling} - Et set med tråder som avhenger av hverandre er scheduled til å kjøre på et set av processorer sammtidig. På en en-til-en basis.
+\item 
+\emph{Dedicated Processor Assignment} - provides implicit scheduling
+defined by the assignment of
+threads to processors
+\item 
+\emph{Dynamic scheduling } - the number of threads in a process
+can be altered during the course of
+execution
+\end{itemize}
+
+
+\section{Real-time scheduling}
+\begin{itemize}
+\item 
+\emph{FIFO/FCFS first come first serve}
+\item 
+\emph{FPS - Fixed-priority scheduling} 
+\item 
+\emph{EDF - Earliset deadline first shceduling}
+\item 
+\emph{Round-robin scheduling } - Bytter 
+\end{itemize}
+
+
+Not exact but attractive due to it's simplicity
+
+Utilization test for FPS
+
+$ Sum(C_i/T_i) <= N(2^(1/N) - 1) $
+
+Where T is period
+C is computation time
+N is number of tasks
+
+This test is sufficient but not necessary. This means that if the test fails the tasks may or may not fail at run-time.
+
+Improved utilization test
+
+$ N II i=1 (C_i/T_i + 1) =< 2$ 
+
+RTA for FPS
+
+$R_i = C_i + I_i $
+
+I is the maximum interference
+
+Ceiling function $(^[]^)$
+
+Number of release $Ceil(R_i/T_j)$
+
+
+$ w_i = C_i + sum(ceil(w_i^n/T_j)*C_j)$ 
